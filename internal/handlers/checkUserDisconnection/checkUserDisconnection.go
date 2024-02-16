@@ -1,4 +1,4 @@
-package checksAccountDisconnection
+package checkUserDisconnection
 
 import (
 	"github.com/go-chi/render"

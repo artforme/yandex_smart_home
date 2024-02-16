@@ -1,12 +1,15 @@
 package main
 
 import (
-	"fmt"
-	"github.com/go-chi/chi/v5"
-	_ "github.com/go-chi/chi/v5"
+	"github.com/gorilla/mux"
 	"log/slog"
 	"net/http"
 	"yandex_smart_house/internal/config"
+	"yandex_smart_house/internal/handlers/checkAccessibility"
+	"yandex_smart_house/internal/handlers/checkChangingDevices"
+	"yandex_smart_house/internal/handlers/checkDeviceStatus"
+	"yandex_smart_house/internal/handlers/checkListUpdate"
+	"yandex_smart_house/internal/handlers/checkUserDisconnection"
 	"yandex_smart_house/internal/logger"
 )
 
@@ -26,16 +29,14 @@ func main() {
 
 	log.Info("fuck you", slog.StringValue(conf.Address))
 
-	router := chi.NewRouter()
+	router := mux.NewRouter()
 
 	// There are some basic handlers for yandex that we use in specific method and url
-	router.Get("/v1.0", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "Hello, World from /v1.0 on Go server!")
-	})
-	////router.Post("v1.0/user/unlink", somehandler.New(log))
-	////router.Head("v1.0/user/devices", somehandler.New(log))
-	////router.Post("/v1.0/user/devices/query", somehandler.New(log))
-	////router.Post("/v1.0/user/devices/action", somehandler.New(log))
+	router.HandleFunc("/v1.0", checkAccessibility.New(log)).Methods("GET")
+	router.HandleFunc("/v1.0/user/unlink", checkUserDisconnection.New(log)).Methods("POST")
+	router.HandleFunc("/v1.0/user/devices", checkListUpdate.New(log)).Methods("GET")
+	router.HandleFunc("/v1.0/user/devices/query", checkDeviceStatus.New(log)).Methods("POST")
+	router.HandleFunc("/v1.0/user/devices/action", checkChangingDevices.New(log)).Methods("POST")
 
 	// setup server
 	srv := &http.Server{
