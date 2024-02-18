@@ -2,17 +2,16 @@ package main
 
 import (
 	"github.com/gorilla/mux"
-	_ "github.com/gorilla/mux"
 	"log/slog"
 	"net/http"
 	"yandex_smart_house/internal/config"
-	"yandex_smart_house/internal/handlers/authrizetor"
-	"yandex_smart_house/internal/handlers/checkAccessibility"
-	"yandex_smart_house/internal/handlers/checkChangingDevices"
-	"yandex_smart_house/internal/handlers/checkDeviceStatus"
-	"yandex_smart_house/internal/handlers/checkListUpdate"
-	"yandex_smart_house/internal/handlers/checkUserDisconnection"
-	"yandex_smart_house/internal/handlers/login"
+	"yandex_smart_house/internal/https-server/handlers/auth/authrizetor"
+	"yandex_smart_house/internal/https-server/handlers/auth/login"
+	"yandex_smart_house/internal/https-server/handlers/checkAccessibility"
+	"yandex_smart_house/internal/https-server/handlers/checkChangingDevices"
+	"yandex_smart_house/internal/https-server/handlers/checkDeviceStatus"
+	"yandex_smart_house/internal/https-server/handlers/checkListUpdate"
+	"yandex_smart_house/internal/https-server/handlers/checkUserDisconnection"
 	"yandex_smart_house/internal/logger"
 )
 
