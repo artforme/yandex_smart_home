@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sign Up & Log In</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            padding: 10px;
+        }
+        .form-container {
+            background-color: white;
+            padding: 20px;
+            margin: 0 auto;
+            width: 300px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        input[type=text], input[type=password] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #5cb85c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #4cae4c;
+        }
+        .toggle-btn {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: #007bff;
+            cursor: pointer;
+        }
+        .success, .error {
+            color: white;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            display: none;
+        }
+        .success {
+            background-color: #28a745;
+        }
+        .error {
+            background-color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+
+<div class="form-container" id="formContainer">
+    <!-- Формы будут здесь динамически добавляться и меняться -->
+</div>
+
+<a class="toggle-btn" id="toggleForm">Need to sign up?</a>
+
+<div class="success" id="successMessage">Operation successful!</div>
+<div class="error" id="errorMessage">An error occurred.</div>
+
+<script>
+    const formContainer = document.getElementById('formContainer');
+    const toggleForm = document.getElementById('toggleForm');
+    const successMessage = document.getElementById('successMessage');
+    const errorMessage = document.getElementById('errorMessage');
+
+    // Функция для отображения формы регистрации
+    function showSignUpForm() {
+        formContainer.innerHTML = `
+            <h2>Sign Up</h2>
+            <input type="email" id="signupEmail" placeholder="Email" required pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$">
+            <input type="password" id="signupPassword" placeholder="Password">
+            <button id="signUp">Sign Up</button>
+        `;
+        document.getElementById('signUp').addEventListener('click', function() {
+            var email = document.getElementById('signupEmail').value;
+            var password = document.getElementById('signupPassword').value;
+
+            fetch('/api/signup', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    username: email,
+                    password: password,
+                }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Success:', data);
+                    // Показать сообщение об успехе или перенаправить пользователя
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                    // Показать сообщение об ошибке
+                });
+            displayMessage(true, "Sign Up successful!");
+        });
+
+        toggleForm.innerText = 'Already have an account? Log In';
+    }
+
+    // Функция для отображения формы входа
+    function showLogInForm() {
+        formContainer.innerHTML = `
+            <h2>Log In</h2>
+            <input type="email" id="loginEmail" placeholder="Email" required pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$">
+            <input type="password" id="loginPassword" placeholder="Password">
+            <button id="logIn">Log In</button>
+        `;
+        document.getElementById('logIn').addEventListener('click', function() {
+            var email = document.getElementById('email').value;
+            var password = document.getElementById('password').value;
+
+            fetch('/api/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    username: email,
+                    password: password,
+                }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Success:', data);
+                    // Здесь можно добавить действия после успешного входа,
+                    // например, переадресацию на другую страницу
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                });
+            displayMessage(true, "Log In successful!");
+        });
+        toggleForm.innerText = 'Need to sign up?';
+    }
+
+
+
+    // Функция для обработки переключения форм
+    toggleForm.addEventListener('click', function() {
+        if (toggleForm.innerText.includes("Log In")) {
+            showLogInForm();
+        } else {
+            showSignUpForm();
+        }
+    });
+
+    function displayMessage(success, msg) {
+        if (success) {
+            successMessage.style.display = "block";
+            successMessage.innerText = msg;
+            errorMessage.style.display = "none";
+        } else {
+            errorMessage.style.display = "block";
+            errorMessage.innerText = msg;
+            successMessage.style.display = "none";
+        }
+        setTimeout(() => {
+            successMessage.style.display = "none";
+            errorMessage.style.display = "none";
+        }, 3000);
+    }
+
+    // Отображение исходной формы
+    showSignUpForm();
+</script>
+</body>
+</html>
