@@ -11,7 +11,11 @@ type Response struct {
 	Password string `json:"password"`
 }
 
-func New(log *slog.Logger) http.HandlerFunc {
+type Checker interface {
+	Insert() error
+}
+
+func New(log *slog.Logger, checker Checker) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req Response
 		log.Info("i'm here")
