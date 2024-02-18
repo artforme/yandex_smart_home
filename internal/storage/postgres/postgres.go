@@ -11,7 +11,7 @@ const (
 	port     = 5432
 	user     = "postgres"
 	password = "284411"
-	dbname   = "yandex_smart_house"
+	dbname   = "yandex_smart_home"
 )
 
 type Storage struct {
