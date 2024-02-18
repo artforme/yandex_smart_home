@@ -2,14 +2,17 @@ package main
 
 import (
 	"github.com/gorilla/mux"
+	_ "github.com/gorilla/mux"
 	"log/slog"
 	"net/http"
 	"yandex_smart_house/internal/config"
+	"yandex_smart_house/internal/handlers/authrizetor"
 	"yandex_smart_house/internal/handlers/checkAccessibility"
 	"yandex_smart_house/internal/handlers/checkChangingDevices"
 	"yandex_smart_house/internal/handlers/checkDeviceStatus"
 	"yandex_smart_house/internal/handlers/checkListUpdate"
 	"yandex_smart_house/internal/handlers/checkUserDisconnection"
+	"yandex_smart_house/internal/handlers/login"
 	"yandex_smart_house/internal/logger"
 )
 
@@ -27,7 +30,7 @@ func main() {
 
 	log.Error("error message enabled")
 
-	log.Info("fuck you", slog.StringValue(conf.Address))
+	log.Info("", slog.StringValue(conf.Address))
 
 	router := mux.NewRouter()
 
@@ -37,6 +40,9 @@ func main() {
 	router.HandleFunc("/v1.0/user/devices", checkListUpdate.New(log)).Methods("GET")
 	router.HandleFunc("/v1.0/user/devices/query", checkDeviceStatus.New(log)).Methods("POST")
 	router.HandleFunc("/v1.0/user/devices/action", checkChangingDevices.New(log)).Methods("POST")
+	router.HandleFunc("/api/auth/authorize", authrizetor.New(log)).Methods("GET")
+	router.HandleFunc("/api/signup", login.New(log)).Methods("POST")
+	//router.HandleFunc("/api/login", authrizetor.New(log)).Methods("POST")
 
 	// setup server
 	srv := &http.Server{
