@@ -79,19 +79,19 @@ func (s *Storage) Search(userID string) error {
 	const op = "storage.postgres.Search"
 
 	searchIDUser := `
-		SELECT *
-		FROM users
-		WHERE user_id = $1
+		 SELECT user_id, password 
+		 FROM users 
+		 WHERE user_id = $1
 	`
 	row := s.dataBase.QueryRow(searchIDUser, userID)
 
 	var currentUser User
-	err := row.Scan(currentUser.UserID, currentUser.Hash)
+	err := row.Scan(&currentUser.UserID, &currentUser.Hash)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return err
 		}
-		return fmt.Errorf("%s: scan result: %w", op, err) // Ошибка при сканировании
+		return fmt.Errorf("%s: scan result: %w", op, err)
 	}
 
 	return nil

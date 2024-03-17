@@ -101,7 +101,7 @@
                 throw new Error(result.message || 'Что-то пошло не так');
             }
         } catch (error) {
-            messageDiv.textContent = error.message || 'Ошибка отправки формы, попробуйте еще раз.';
+            messageDiv.textContent = 'Ошибка отправки формы, попробуйте еще раз.';
             messageDiv.classList.add('error');
         }
     };
