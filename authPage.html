@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Форма входа</title>
+    <style>
+        .login-form {
+            width: 300px;
+            margin: 100px auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .login-form input[type="text"],
+        .login-form input[type="password"] {
+            width: 100%;
+            padding: 8px;
+            margin: 8px 0;
+            display: inline-block;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+        }
+        .login-form button {
+            width: 100%;
+            background-color: #4CAF50;
+            color: white;
+            padding: 14px 20px;
+            margin: 8px 0;
+            border: none;
+            cursor: pointer;
+        }
+        .login-form button:hover {
+            opacity: 0.8;
+        }
+        .message {
+            text-align: center;
+            margin: 10px 0;
+            font-size: 16px;
+        }
+        .success {
+            color: green;
+        }
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-form">
+    <h2>Вход в систему</h2>
+    <form id="loginForm">
+        <label for="user-id">ID пользователя</label>
+        <input type="text" id="user-id" name="userid" required>
+
+        <label for="password">Пароль</label>
+        <input type="password" id="password" name="password" required>
+
+        <button type="submit">Войти</button>
+
+        <div id="message" class="message"></div>
+    </form>
+</div>
+
+<script>
+    document.getElementById('loginForm').onsubmit = async function(e) {
+        e.preventDefault(); // Предотвращаем стандартную отправку формы
+
+        const userID = document.getElementById('user-id').value;
+        const password = document.getElementById('password').value;
+
+        const messageDiv = document.getElementById('message');
+        messageDiv.classList.remove('success', 'error'); // Удаляем предыдущие классы
+
+        try {
+            // Отправляем запрос fetch
+            const response = await fetch('/api/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    userid: userID,
+                    password: password
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Ошибка запроса: ' + response.statusText);
+            }
+
+            const result = await response.json();
+
+            // Проверка результата (здесь ожидается, что сервер ответит JSON с полезной нагрузкой)
+            if (result.success) {
+                messageDiv.textContent = 'Форма успешно отправлена!';
+                messageDiv.classList.add('success');
+            } else {
+                throw new Error(result.message || 'Что-то пошло не так');
+            }
+        } catch (error) {
+            messageDiv.textContent = error.message || 'Ошибка отправки формы, попробуйте еще раз.';
+            messageDiv.classList.add('error');
+        }
+    };
+</script>
+
+</body>
+</html>
