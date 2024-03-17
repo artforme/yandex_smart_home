@@ -81,12 +81,12 @@
     function showSignUpForm() {
         formContainer.innerHTML = `
             <h2>Sign Up</h2>
-            <input type="email" id="signupEmail" placeholder="Email" required pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$">
+            <input type="text" id="signupUsername" placeholder="Username">
             <input type="password" id="signupPassword" placeholder="Password">
             <button id="signUp">Sign Up</button>
         `;
         document.getElementById('signUp').addEventListener('click', function() {
-            var email = document.getElementById('signupEmail').value;
+            var username = document.getElementById('signupUsername').value;
             var password = document.getElementById('signupPassword').value;
 
             fetch('/api/signup', {
@@ -95,7 +95,7 @@
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    username: email,
+                    username: username,
                     password: password,
                 }),
             })
@@ -118,12 +118,12 @@
     function showLogInForm() {
         formContainer.innerHTML = `
             <h2>Log In</h2>
-            <input type="email" id="loginEmail" placeholder="Email" required pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$">
+            <input type="text" id="loginUsername" placeholder="Username">
             <input type="password" id="loginPassword" placeholder="Password">
             <button id="logIn">Log In</button>
         `;
         document.getElementById('logIn').addEventListener('click', function() {
-            var email = document.getElementById('email').value;
+            var username = document.getElementById('username').value;
             var password = document.getElementById('password').value;
 
             fetch('/api/login', {
@@ -132,7 +132,7 @@
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    username: email,
+                    username: username,
                     password: password,
                 }),
             })
@@ -178,7 +178,7 @@
     }
 
     // Отображение исходной формы
-    showSignUpForm();
+    showLogInForm();
 </script>
 </body>
 </html>
