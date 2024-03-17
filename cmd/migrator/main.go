@@ -77,3 +77,5 @@ func main() {
 
 	fmt.Println("migrations applied")
 }
+
+//go run ./cmd/migrator/main.go --migrations-path=./migrations --direction=up

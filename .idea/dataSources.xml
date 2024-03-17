@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="yandex_smart_house@localhost" uuid="288ab792-8c76-412b-a0c6-f6340dcd8a48">
+    <data-source source="LOCAL" name="yandex_smart_home@localhost" uuid="288ab792-8c76-412b-a0c6-f6340dcd8a48">
       <driver-ref>postgresql</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.postgresql.Driver</jdbc-driver>
-      <jdbc-url>jdbc:postgresql://localhost:5432/yandex_smart_house</jdbc-url>
+      <jdbc-url>jdbc:postgresql://localhost:5432/yandex_smart_home</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
   </component>

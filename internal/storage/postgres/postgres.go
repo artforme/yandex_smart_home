@@ -1,10 +1,17 @@
 package postgres
 
 import (
+	"database/sql"
+	"errors"
 	"fmt"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 )
+
+type User struct {
+	userID string
+	hash   string
+}
 
 const (
 	host     = "localhost"
@@ -66,5 +73,41 @@ func New() (*Storage, error) {
 }
 
 func (s *Storage) Insert() error {
+	return nil
+}
+
+func (s *Storage) Search(userID string) error {
+	const op = "storage.postgres.Search"
+
+	//psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
+	//
+	//db, err := sqlx.Connect("postgres", psqlInfo)
+	//if err != nil {
+	//	return fmt.Errorf("%s: fail conection to the db: %w", op, err)
+	//}
+	//defer db.Close()
+
+	searchIDUser := `
+		SELECT *
+		FROM users
+		WHERE user_id = $1
+	`
+	// Используем QueryRow, поскольку ожидается одна строка ответа
+	row := s.dataBase.QueryRow(searchIDUser, userID)
+
+	// Подготовим переменные, куда будем сканировать результат
+	// Замените 'User' на соответствующую структуру, которую вы используете
+	var currentUser User
+	err := row.Scan(currentUser.userID, currentUser.hash)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return err // Если не найдено, возвращаем ошибку
+		}
+		return fmt.Errorf("%s: scan result: %w", op, err) // Ошибка при сканировании
+	}
+
+	// Далее вы можете работать с найденным пользователем
+	// Например, выводить информацию о нём и т.д.
+
 	return nil
 }
