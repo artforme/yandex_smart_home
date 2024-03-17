@@ -1,10 +1,14 @@
 package main
 
 import (
+	"context"
 	"github.com/gorilla/mux"
 	"log/slog"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
+	"time"
 	"yandex_smart_house/internal/config"
 	"yandex_smart_house/internal/https-server/handlers/auth/authrizetor"
 	"yandex_smart_house/internal/https-server/handlers/auth/login"
@@ -14,6 +18,7 @@ import (
 	"yandex_smart_house/internal/https-server/handlers/checkListUpdate"
 	"yandex_smart_house/internal/https-server/handlers/checkUserDisconnection"
 	"yandex_smart_house/internal/logger"
+	"yandex_smart_house/internal/server"
 	"yandex_smart_house/internal/storage/postgres"
 )
 
@@ -61,11 +66,32 @@ func main() {
 		WriteTimeout: conf.HTTPServer.Timeout,
 		IdleTimeout:  conf.HTTPServer.Idle_timeout,
 	}
-	if err := srv.ListenAndServe(); err != nil {
-		log.Error("failed to start server")
+
+	stopChan := make(chan os.Signal, 1)
+	signal.Notify(stopChan, syscall.SIGTERM, syscall.SIGINT)
+
+	go func() {
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Error("failed to start server", slog.StringValue(err.Error()))
+		}
+	}()
+	log.Info("Server started")
+
+	<-stopChan
+	log.Info("Shutdown signal received, exiting...")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	if err := srv.Shutdown(ctx); err != nil {
+		log.Error("Server shutdown failed", slog.StringValue(err.Error()))
 	}
 
-	log.Error("server stopped")
+	if err := server.CloseDataBase(log, storage); err != nil {
+		log.Error("failed to close resources on shutdown", slog.StringValue(err.Error()))
+	}
+
+	log.Info("Server gracefully stopped")
 
 	// TODO: make simple oauth 2.0 verification
 

@@ -9,8 +9,8 @@ import (
 )
 
 type User struct {
-	userID string
-	hash   string
+	UserID string
+	Hash   string
 }
 
 const (
@@ -34,7 +34,6 @@ func New() (*Storage, error) {
 	if err != nil {
 		return nil, fmt.Errorf("%s: fail conection to the db: %w", op, err)
 	}
-	defer db.Close()
 
 	createUsersTable := `
 		CREATE TABLE IF NOT EXISTS users (
@@ -79,35 +78,27 @@ func (s *Storage) Insert() error {
 func (s *Storage) Search(userID string) error {
 	const op = "storage.postgres.Search"
 
-	//psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
-	//
-	//db, err := sqlx.Connect("postgres", psqlInfo)
-	//if err != nil {
-	//	return fmt.Errorf("%s: fail conection to the db: %w", op, err)
-	//}
-	//defer db.Close()
-
 	searchIDUser := `
 		SELECT *
 		FROM users
 		WHERE user_id = $1
 	`
-	// Используем QueryRow, поскольку ожидается одна строка ответа
 	row := s.dataBase.QueryRow(searchIDUser, userID)
 
-	// Подготовим переменные, куда будем сканировать результат
-	// Замените 'User' на соответствующую структуру, которую вы используете
 	var currentUser User
-	err := row.Scan(currentUser.userID, currentUser.hash)
+	err := row.Scan(currentUser.UserID, currentUser.Hash)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return err // Если не найдено, возвращаем ошибку
+			return err
 		}
 		return fmt.Errorf("%s: scan result: %w", op, err) // Ошибка при сканировании
 	}
 
-	// Далее вы можете работать с найденным пользователем
-	// Например, выводить информацию о нём и т.д.
-
+	return nil
+}
+func (s *Storage) Close() error {
+	if err := s.dataBase.Close(); err != nil {
+		return fmt.Errorf("error closing database connection: %w", err)
+	}
 	return nil
 }
