@@ -17,8 +17,8 @@ import (
 	"yandex_smart_house/internal/https-server/handlers/checkDeviceStatus"
 	"yandex_smart_house/internal/https-server/handlers/checkListUpdate"
 	"yandex_smart_house/internal/https-server/handlers/checkUserDisconnection"
+	"yandex_smart_house/internal/https-server/server"
 	"yandex_smart_house/internal/logger"
-	"yandex_smart_house/internal/server"
 	"yandex_smart_house/internal/storage/postgres"
 )
 
@@ -105,3 +105,5 @@ func main() {
 
 	// TODO: test project
 }
+
+//6IyGSHZlOZMLCjGPrtervr8S5wV15GeN
