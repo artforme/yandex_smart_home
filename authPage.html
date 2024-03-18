@@ -94,7 +94,7 @@
             const result = await response.json();
 
             // Проверка результата (здесь ожидается, что сервер ответит JSON с полезной нагрузкой)
-            if (result.success) {
+            if (result.status === "200") {
                 messageDiv.textContent = 'Форма успешно отправлена!';
                 messageDiv.classList.add('success');
             } else {

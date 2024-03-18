@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="yandex_smart_home@localhost" uuid="288ab792-8c76-412b-a0c6-f6340dcd8a48">
+    <data-source source="LOCAL" name="yandex_smart_home@localhost" uuid="650c7ae0-f0a4-479c-bd7f-ce72ac191463">
       <driver-ref>postgresql</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.postgresql.Driver</jdbc-driver>
