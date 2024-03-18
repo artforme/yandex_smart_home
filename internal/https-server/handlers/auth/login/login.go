@@ -7,14 +7,19 @@ import (
 	"github.com/go-chi/render"
 	"log/slog"
 	"net/http"
+	"yandex_smart_house/internal/tokenApi"
 )
 
 type Response struct {
 	Status string `json:"status"`
 }
 type Request struct {
-	UserID   string `json:"userid"`
-	Password string `json:"password"`
+	RedirectURI string `json:"redirect_uri"`
+	ClientID    string `json:"client_id"`
+	Scope       string `json:"scope"`
+	State       string `json:"state"`
+	UserID      string `json:"userid"`
+	Password    string `json:"password"`
 }
 
 type Checker interface {
@@ -23,14 +28,18 @@ type Checker interface {
 
 func New(log *slog.Logger, checker Checker) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+
 		var req Request
-		log.Info("i'm here")
 		// decode body request
 		err := render.DecodeJSON(r.Body, &req)
 		if err != nil {
-			panic("ouch")
+			log.Error("failed to decode JSON request body", slog.Attr{
+				Key:   "error",
+				Value: slog.StringValue(err.Error()),
+			})
+			render.JSON(w, r, Response{Status: "400"})
+			return
 		}
-		fmt.Println(req.UserID, req.Password)
 		if err = checker.Search(req.UserID, req.Password); err != nil {
 			log.Error("failed to find outgoing userID", slog.Attr{
 				Key:   "error",
@@ -42,6 +51,19 @@ func New(log *slog.Logger, checker Checker) http.HandlerFunc {
 			render.JSON(w, r, Response{Status: "400"})
 			return
 		}
+
+		token, err := tokenApi.GenerateToken(req.UserID)
+		if err != nil {
+			log.Error("failed to generate token", slog.Attr{
+				Key:   "error",
+				Value: slog.StringValue(err.Error()),
+			})
+			render.JSON(w, r, Response{Status: "500"})
+			return
+		}
+
+		redirectURL := tokenApi.RedirectToProvider(req.RedirectURI, token, req.State, req.ClientID, req.Scope)
+		fmt.Println(redirectURL)
 
 		render.JSON(w, r, Response{Status: "200"})
 	}
