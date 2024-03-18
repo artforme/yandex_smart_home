@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
+	"golang.org/x/crypto/bcrypt"
+	"yandex_smart_house/internal/random"
 )
 
 type User struct {
@@ -71,27 +73,50 @@ func New() (*Storage, error) {
 	return &Storage{dataBase: db}, nil
 }
 
-func (s *Storage) Insert() error {
+func (s *Storage) Insert(userID string) error {
+	const op = "storage.postgres.Insert"
+
+	insertStr := `
+		INSERT INTO users (user_id, password) 
+		VALUES ($1, $2);
+	`
+	userPassword := random.NewRandomString(32)
+	fmt.Println(userPassword)
+	hash, err := bcrypt.GenerateFromPassword([]byte(userPassword), 10)
+	fmt.Println(hash)
+	if err != nil {
+		return fmt.Errorf("%s: hash generation fail: %w", op, err)
+	}
+
+	_, err = s.dataBase.Exec(insertStr, userID, string(hash))
+	if err != nil {
+		return fmt.Errorf("%s: hash generation fail: %w", op, err)
+	}
 	return nil
 }
 
-func (s *Storage) Search(userID string) error {
+func (s *Storage) Search(userID string, userPassword string) error {
 	const op = "storage.postgres.Search"
 
 	searchIDUser := `
-		 SELECT user_id, password 
-		 FROM users 
-		 WHERE user_id = $1
+		SELECT password
+		FROM users
+		WHERE user_id = $1;
 	`
-	row := s.dataBase.QueryRow(searchIDUser, userID)
 
-	var currentUser User
-	err := row.Scan(&currentUser.UserID, &currentUser.Hash)
+	var hashFromDB []byte
+
+	err := s.dataBase.QueryRow(searchIDUser, userID).Scan(&hashFromDB)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return err
 		}
-		return fmt.Errorf("%s: scan result: %w", op, err)
+		return fmt.Errorf("%s: QueryRow fail: %w", op, err)
+	}
+
+	err = bcrypt.CompareHashAndPassword(hashFromDB, []byte(userPassword))
+	if err != nil {
+		return fmt.Errorf("%s: password does't match: %w", op, err)
 	}
 
 	return nil
