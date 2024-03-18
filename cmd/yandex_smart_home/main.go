@@ -71,8 +71,9 @@ func main() {
 	signal.Notify(stopChan, syscall.SIGTERM, syscall.SIGINT)
 
 	go func() {
-		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		if err = srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Error("failed to start server", slog.StringValue(err.Error()))
+			os.Exit(1)
 		}
 	}()
 	log.Info("Server started")
@@ -83,19 +84,17 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	if err := srv.Shutdown(ctx); err != nil {
+	if err = srv.Shutdown(ctx); err != nil {
 		log.Error("Server shutdown failed", slog.StringValue(err.Error()))
 	}
 
-	if err := server.CloseDataBase(log, storage); err != nil {
+	if err = server.CloseDataBase(log, storage); err != nil {
 		log.Error("failed to close resources on shutdown", slog.StringValue(err.Error()))
 	}
 
 	log.Info("Server gracefully stopped")
 
 	// TODO: make simple oauth 2.0 verification
-
-	// TODO: init storage and connect it
 
 	// TODO: test system
 

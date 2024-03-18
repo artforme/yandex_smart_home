@@ -65,17 +65,31 @@
 </div>
 
 <script>
+    // Функция для получения параметров из URL
+    function getUrlParameter(name) {
+        name = name.replace(/[\[]/, '\[').replace(/[\]]/, '\]');
+        var regex = new RegExp('[\?&]' + name + '=([^&#]*)');
+        var results = regex.exec(location.search);
+        return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+    }
+
     document.getElementById('loginForm').onsubmit = async function(e) {
         e.preventDefault(); // Предотвращаем стандартную отправку формы
 
         const userID = document.getElementById('user-id').value;
         const password = document.getElementById('password').value;
 
+        // Извлекаем параметры из URL
+        const redirectUri = getUrlParameter('redirect_uri');
+        const clientId = getUrlParameter('client_id');
+        const scope = getUrlParameter('scope');
+        const state = getUrlParameter('state');
+
         const messageDiv = document.getElementById('message');
         messageDiv.classList.remove('success', 'error'); // Удаляем предыдущие классы
 
         try {
-            // Отправляем запрос fetch
+            // Добавляем параметры из URL в тело запроса
             const response = await fetch('/api/login', {
                 method: 'POST',
                 headers: {
@@ -83,7 +97,11 @@
                 },
                 body: JSON.stringify({
                     userid: userID,
-                    password: password
+                    password: password,
+                    redirect_uri: redirectUri,
+                    client_id: clientId,
+                    scope: scope,
+                    state: state
                 }),
             });
 
