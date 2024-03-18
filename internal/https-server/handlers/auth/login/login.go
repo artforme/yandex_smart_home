@@ -14,12 +14,13 @@ type Response struct {
 	Status string `json:"status"`
 }
 type Request struct {
-	RedirectURI string `json:"redirect_uri"`
-	ClientID    string `json:"client_id"`
-	Scope       string `json:"scope"`
-	State       string `json:"state"`
-	UserID      string `json:"userid"`
-	Password    string `json:"password"`
+	RedirectURI  string `json:"redirect_uri"`
+	ClientID     string `json:"client_id"`
+	ResponseType string `json:"response_type"`
+	Scope        string `json:"scope"`
+	State        string `json:"state"`
+	UserID       string `json:"userid"`
+	Password     string `json:"password"`
 }
 
 type Checker interface {
@@ -62,7 +63,8 @@ func New(log *slog.Logger, checker Checker) http.HandlerFunc {
 			return
 		}
 
-		redirectURL := tokenApi.RedirectToProvider(req.RedirectURI, token, req.State, req.ClientID, req.Scope)
+		redirectURL := tokenApi.RedirectToProvider(req.RedirectURI, req.ResponseType, token, req.State, req.ClientID, req.Scope)
+		fmt.Println(req.ResponseType)
 		fmt.Println(redirectURL)
 
 		render.JSON(w, r, Response{Status: "200"})

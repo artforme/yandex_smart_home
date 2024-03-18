@@ -81,6 +81,7 @@
 
         // Извлекаем параметры из URL
         const redirectUri = getUrlParameter('redirect_uri');
+        const responseType = getUrlParameter('response_type')
         const clientId = getUrlParameter('client_id');
         const scope = getUrlParameter('scope');
         const state = getUrlParameter('state');
@@ -99,6 +100,7 @@
                     userid: userID,
                     password: password,
                     redirect_uri: redirectUri,
+                    response_type: responseType,
                     client_id: clientId,
                     scope: scope,
                     state: state
