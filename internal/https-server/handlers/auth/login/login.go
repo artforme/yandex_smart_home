@@ -18,7 +18,7 @@ type Request struct {
 }
 
 type Checker interface {
-	Search(string) error
+	Search(string, string) error
 }
 
 func New(log *slog.Logger, checker Checker) http.HandlerFunc {
@@ -31,7 +31,7 @@ func New(log *slog.Logger, checker Checker) http.HandlerFunc {
 			panic("ouch")
 		}
 		fmt.Println(req.UserID, req.Password)
-		if err = checker.Search(req.UserID); err != nil {
+		if err = checker.Search(req.UserID, req.Password); err != nil {
 			log.Error("failed to find outgoing userID", slog.Attr{
 				Key:   "error",
 				Value: slog.StringValue(err.Error()),
