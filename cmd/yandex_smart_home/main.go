@@ -10,6 +10,7 @@ import (
 	"syscall"
 	"time"
 	"yandex_smart_house/internal/config"
+	"yandex_smart_house/internal/https-server/handlers/auth/authTokenGenerator"
 	"yandex_smart_house/internal/https-server/handlers/auth/authrizetor"
 	"yandex_smart_house/internal/https-server/handlers/auth/login"
 	"yandex_smart_house/internal/https-server/handlers/checkAccessibility"
@@ -56,6 +57,7 @@ func main() {
 	router.HandleFunc("/api/auth/authorize", authrizetor.New(log)).Methods("GET")
 	router.HandleFunc("/api/signup", login.New(log, storage)).Methods("POST")
 	router.HandleFunc("/api/login", login.New(log, storage)).Methods("POST")
+	router.HandleFunc("/api/auth/token", authTokenGenerator.New(log)).Methods("POST")
 	//router.HandleFunc("/api/login", authrizetor.New(log)).Methods("POST")
 
 	// setup server
