@@ -11,7 +11,8 @@ import (
 )
 
 type Response struct {
-	Status string `json:"status"`
+	Status      uint   `json:"status"`
+	RedirectURL string `json:"redirectURL"`
 }
 type Request struct {
 	RedirectURI  string `json:"redirect_uri"`
@@ -38,7 +39,7 @@ func New(log *slog.Logger, checker Checker) http.HandlerFunc {
 				Key:   "error",
 				Value: slog.StringValue(err.Error()),
 			})
-			render.JSON(w, r, Response{Status: "400"})
+			render.JSON(w, r, Response{Status: http.StatusBadRequest})
 			return
 		}
 		if err = checker.Search(req.UserID, req.Password); err != nil {
@@ -47,9 +48,9 @@ func New(log *slog.Logger, checker Checker) http.HandlerFunc {
 				Value: slog.StringValue(err.Error()),
 			})
 			if errors.Is(err, sql.ErrNoRows) {
-				render.JSON(w, r, Response{Status: "404"})
+				render.JSON(w, r, Response{Status: http.StatusNotFound})
 			}
-			render.JSON(w, r, Response{Status: "400"})
+			render.JSON(w, r, Response{Status: http.StatusInternalServerError})
 			return
 		}
 
@@ -59,14 +60,12 @@ func New(log *slog.Logger, checker Checker) http.HandlerFunc {
 				Key:   "error",
 				Value: slog.StringValue(err.Error()),
 			})
-			render.JSON(w, r, Response{Status: "500"})
+			render.JSON(w, r, Response{Status: http.StatusInternalServerError})
 			return
 		}
 
-		redirectURL := tokenApi.RedirectToProvider(req.RedirectURI, req.ResponseType, token, req.State, req.ClientID, req.Scope)
-		fmt.Println(req.ResponseType)
-		fmt.Println(redirectURL)
+		redirectURL := fmt.Sprintf("%s?%s=%s&client_id=%s&state=%s&scope=%s", req.RedirectURI, req.ResponseType, token, req.ClientID, req.State, req.Scope)
 
-		render.JSON(w, r, Response{Status: "200"})
+		render.JSON(w, r, Response{Status: http.StatusFound, RedirectURL: redirectURL})
 	}
 }
