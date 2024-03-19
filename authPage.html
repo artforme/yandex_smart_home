@@ -74,20 +74,20 @@
     }
 
     document.getElementById('loginForm').onsubmit = async function(e) {
-        e.preventDefault(); // Предотвращаем стандартную отправку формы
+        e.preventDefault();
 
         const userID = document.getElementById('user-id').value;
         const password = document.getElementById('password').value;
 
-        // Извлекаем параметры из URL
+
         const redirectUri = getUrlParameter('redirect_uri');
-        const responseType = getUrlParameter('response_type')
+        const responseType = getUrlParameter('response_type');
         const clientId = getUrlParameter('client_id');
         const scope = getUrlParameter('scope');
         const state = getUrlParameter('state');
 
         const messageDiv = document.getElementById('message');
-        messageDiv.classList.remove('success', 'error'); // Удаляем предыдущие классы
+        messageDiv.classList.remove('success', 'error');
 
         try {
             // Добавляем параметры из URL в тело запроса
@@ -113,15 +113,14 @@
 
             const result = await response.json();
 
-            // Проверка результата (здесь ожидается, что сервер ответит JSON с полезной нагрузкой)
-            if (result.status === "200") {
-                messageDiv.textContent = 'Форма успешно отправлена!';
-                messageDiv.classList.add('success');
+            // Если в ответе сервера есть URL для редиректа, выполняем переход на указанный адрес
+            if (result.redirectURL) {
+                window.location.href = result.redirectURL;
             } else {
-                throw new Error(result.message || 'Что-то пошло не так');
+                throw new Error(result.message || 'Что-то пошло не так.');
             }
         } catch (error) {
-            messageDiv.textContent = 'Ошибка отправки формы, попробуйте еще раз.';
+            messageDiv.textContent = error.message;
             messageDiv.classList.add('error');
         }
     };
