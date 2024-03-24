@@ -2,35 +2,39 @@ package authTokenGenerator
 
 import (
 	"fmt"
-	"io"
+	"github.com/go-chi/render"
 	"log/slog"
 	"net/http"
+	"yandex_smart_house/internal/tokenApi"
 )
+
+type Response struct {
+	Status uint `json:"status"`
+}
 
 func New(log *slog.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		fmt.Println("Метод запроса:", r.Method)
-		fmt.Println("URI запроса:", r.RequestURI)
-		fmt.Println("Хост запроса:", r.Host)
-		fmt.Println("Заголовки запроса:")
-		for name, headers := range r.Header {
-			for _, h := range headers {
-				fmt.Printf("\t%s: %s\n", name, h)
-			}
+		if err := r.ParseForm(); err != nil {
+			log.Error("failed to parse request form", slog.Attr{
+				Key:   "error",
+				Value: slog.StringValue(err.Error()),
+			})
+			render.JSON(w, r, Response{Status: http.StatusBadRequest})
+			return
 		}
 
-		// Чтение тела запроса
-		data, _ := io.ReadAll(r.Body)
-		fmt.Println("Тело запроса:", string(data))
+		code := r.PostFormValue("code")
 
-		// Вывод параметров запроса (query parameters)
-		fmt.Println("Параметры запроса:")
-		r.ParseForm()
-		for key, values := range r.Form {
-			for _, value := range values {
-				fmt.Printf("\t%s: %s\n", key, value)
-			}
+		_, err := tokenApi.ValidateJWTToken(code)
+		if err != nil {
+			log.Error("token is invalid", slog.Attr{
+				Key:   "error",
+				Value: slog.StringValue(err.Error()),
+			})
+			render.JSON(w, r, Response{Status: http.StatusBadRequest})
+			return
 		}
+		fmt.Println(code)
 
 	}
 }
