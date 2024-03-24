@@ -108,7 +108,7 @@
             });
 
             if (!response.ok) {
-                throw new Error('Ошибка запроса: ' + response.statusText);
+                throw new Error('Ошибка запроса');
             }
 
             const result = await response.json();
@@ -120,7 +120,7 @@
                 throw new Error(result.message || 'Что-то пошло не так.');
             }
         } catch (error) {
-            messageDiv.textContent = error.message;
+            messageDiv.textContent = "Ошибка запроса";
             messageDiv.classList.add('error');
         }
     };
