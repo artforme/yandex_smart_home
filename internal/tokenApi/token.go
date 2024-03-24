@@ -1,15 +1,15 @@
 package tokenApi
 
 import (
+	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"os"
 	"time"
 )
 
-func GenerateToken(userID string) (string, error) {
+func GenerateToken() (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"user_id": userID,
-		"exp":     time.Now().Add(time.Hour * 7 * 24).Unix(),
+		"exp": time.Now().Add(time.Second * 3).Unix(),
 	})
 
 	tokenString, err := token.SignedString([]byte(os.Getenv("CLIENT_SECRET")))
@@ -18,4 +18,13 @@ func GenerateToken(userID string) (string, error) {
 	}
 
 	return tokenString, nil
+}
+func ValidateJWTToken(tokenString string) (*jwt.Token, error) {
+	return jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+
+		return []byte(os.Getenv("CLIENT_SECRET")), nil
+	})
 }
