@@ -1,7 +1,7 @@
 package authTokenGenerator
 
 import (
-	"fmt"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/go-chi/render"
 	"log/slog"
 	"net/http"
@@ -9,32 +9,80 @@ import (
 )
 
 type Response struct {
-	Status uint `json:"status"`
+	AccessToken  string `json:"access_token"`
+	TokenType    string `json:"token_type"`
+	ExpiresIn    uint   `json:"expires_in"`
+	RefreshToken string `json:"refresh_token"`
 }
 
-func New(log *slog.Logger) http.HandlerFunc {
+func ReturnAccessToken(log *slog.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if err := r.ParseForm(); err != nil {
 			log.Error("failed to parse request form", slog.Attr{
 				Key:   "error",
 				Value: slog.StringValue(err.Error()),
 			})
-			render.JSON(w, r, Response{Status: http.StatusBadRequest})
+			render.JSON(w, r, Response{})
 			return
 		}
-
 		code := r.PostFormValue("code")
 
-		_, err := tokenApi.ValidateJWTToken(code)
+		token, err := tokenApi.ValidateJWTToken(code, false)
 		if err != nil {
 			log.Error("token is invalid", slog.Attr{
 				Key:   "error",
 				Value: slog.StringValue(err.Error()),
 			})
-			render.JSON(w, r, Response{Status: http.StatusBadRequest})
+			render.JSON(w, r, Response{})
 			return
 		}
-		fmt.Println(code)
+		claims := token.Claims.(jwt.MapClaims)
+		AccessToken, err := tokenApi.GenerateAccessToken(claims["userID"].(string))
+		if err != nil {
+			log.Error("failed to generate token", slog.Attr{
+				Key:   "error",
+				Value: slog.StringValue(err.Error()),
+			})
+			render.JSON(w, r, Response{})
+			return
+		}
+		render.JSON(w, r, Response{AccessToken: AccessToken, TokenType: "JWT", ExpiresIn: 60 * 60 * 24})
+	}
+}
+
+func ReturnRefreshToken(log *slog.Logger) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if err := r.ParseForm(); err != nil {
+			log.Error("failed to parse request form", slog.Attr{
+				Key:   "error",
+				Value: slog.StringValue(err.Error()),
+			})
+			render.JSON(w, r, Response{})
+			return
+		}
+
+		code := r.PostFormValue("code")
+
+		token, err := tokenApi.ValidateJWTToken(code, false)
+		if err != nil {
+			log.Error("token is invalid", slog.Attr{
+				Key:   "error",
+				Value: slog.StringValue(err.Error()),
+			})
+			render.JSON(w, r, Response{})
+			return
+		}
+		claims := token.Claims.(jwt.MapClaims)
+		RefreshToken, err := tokenApi.GenerateRefreshToken(claims["userID"].(string))
+		if err != nil {
+			log.Error("failed to generate token", slog.Attr{
+				Key:   "error",
+				Value: slog.StringValue(err.Error()),
+			})
+			render.JSON(w, r, Response{})
+			return
+		}
+		render.JSON(w, r, Response{RefreshToken: RefreshToken, TokenType: "JWT", ExpiresIn: 60 * 60 * 24 * 7})
 
 	}
 }

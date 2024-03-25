@@ -57,7 +57,8 @@ func main() {
 	router.HandleFunc("/api/auth/authorize", authrizetor.New(log)).Methods("GET")
 	router.HandleFunc("/api/signup", login.New(log, storage)).Methods("POST")
 	router.HandleFunc("/api/login", login.New(log, storage)).Methods("POST")
-	router.HandleFunc("/api/auth/token", authTokenGenerator.New(log)).Methods("POST")
+	router.HandleFunc("/api/auth/token", authTokenGenerator.ReturnAccessToken(log)).Methods("POST")
+	router.HandleFunc("/api/auth/token/refresh", authTokenGenerator.ReturnRefreshToken(log)).Methods("POST")
 	//router.HandleFunc("/api/login", authrizetor.New(log)).Methods("POST")
 
 	// setup server
