@@ -54,7 +54,7 @@ func New(log *slog.Logger, checker Checker) http.HandlerFunc {
 			return
 		}
 
-		token, err := tokenApi.GenerateToken()
+		token, err := tokenApi.GenerateAccessToken(req.UserID)
 		if err != nil {
 			log.Error("failed to generate token", slog.Attr{
 				Key:   "error",
